@@ -6,7 +6,7 @@
 
 ## 線上體驗
 
-[開啟金鑰鍊成器 × 賽博符咒](https://cyber-talisman-key-forge.merle-juan.chatgpt.site)
+[開啟金鑰鍊成器 × 賽博符咒](https://merle1022.github.io/cyber-talisman-key-forge/)
 
 目前體驗站採私人存取，開啟時可能需要登入 ChatGPT。這是託管平台的存取設定，不是密碼庫帳號系統。
 
@@ -55,7 +55,7 @@
 - Responsive Web Design（響應式網頁設計）
 - Web App Manifest
 - Service Worker 離線快取
-- Vinext／React 外層網站與 Sites 託管
+- GitHub Pages 靜態網站託管
 
 ### 亂數與加密
 

@@ -1,4 +1,4 @@
-const CACHE = 'key-forge-v11';
+const CACHE = 'key-forge-v12';
 const APP_SHELL = [
   './',
   './index.html',

@@ -1,0 +1,30 @@
+# 系統與編輯器檔案
+.DS_Store
+.idea/
+.vscode/
+
+# 環境變數與各類憑證
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*credential*
+*secret*
+
+# 密碼庫備份與填寫完成的復原資料
+cyber-talisman-backup*.json
+*backup*.json
+*備份*.json
+*復原卡*
+recovery-card*
+
+# 暫存與備份副本
+*.bak
+*.tmp
+*.swp
+*~
+

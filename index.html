@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在瀏覽器本機產生安全、易讀或好記的密碼，不上傳任何資料。">
+  <meta name="theme-color" content="#170706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="金鑰鍊成器">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>金鑰鍊成器 × 賽博符咒</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&family=Noto+Serif+TC:wght@700;900&display=swap');
+    :root{--paper:#f2c85b;--paper2:#d99b2b;--red:#a71919;--red2:#5d0c0c;--ink:#28110d;--cream:#fff1b8;--cyan:#58e5dc;--shadow:#080303;--ok:#117b5a;--warn:#9a5b00}
+    *{box-sizing:border-box}
+    html{color-scheme:dark}
+    body{margin:0;min-height:100vh;color:var(--cream);font-family:"Noto Sans TC",sans-serif;background:#080303;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(circle at 18% 20%,#641212 0,transparent 35%),radial-gradient(circle at 80% 85%,#17454a 0,transparent 32%),linear-gradient(145deg,#050202,#170706 56%,#050b0c)}
+    .grid{position:fixed;inset:0;z-index:-2;opacity:.13;background-image:linear-gradient(#ffd65a 1px,transparent 1px),linear-gradient(90deg,#ffd65a 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent)}
+    .noise{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.23'/%3E%3C/svg%3E")}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:28px 0 52px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .seal{width:58px;height:58px;display:grid;place-items:center;border:4px double var(--paper);border-radius:50%;color:var(--paper);font:900 28px "Noto Serif TC";transform:rotate(-8deg);box-shadow:0 0 22px #e6b83c55}
+    .brand h1{margin:0;font:900 clamp(22px,4vw,34px) "Noto Serif TC";letter-spacing:.08em;color:var(--paper)}
+    .brand p{margin:2px 0 0;color:#d7aa91;font-size:12px;letter-spacing:.14em}
+    .top-actions{display:flex;align-items:center;gap:8px}.privacy,.install,.guide-btn,.manager-btn{border:1px solid #5eead488;color:#9ff8ec;border-radius:999px;padding:8px 13px;font-size:12px;background:#082b2b99;white-space:nowrap}.install{display:none;border-color:#f2c85b99;color:var(--paper);background:#35100d;font-weight:800}.install.show{display:block}.guide-btn,.manager-btn{border-color:#f2c85b77;color:var(--paper);background:#35100d;font-weight:800}.manager-btn{border-color:#58e5dc88;color:#b8fff7;background:#082b2b}
+    .layout{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(300px,.68fr);gap:22px;align-items:start}
+    .talisman{position:relative;overflow:hidden;color:var(--ink);background:linear-gradient(135deg,var(--paper),#f7d979 48%,var(--paper2));border:7px double var(--red);box-shadow:0 26px 70px #000b,inset 0 0 45px #80220e30}
+    .talisman:before,.talisman:after{content:"急急如律令";position:absolute;top:110px;bottom:26px;width:30px;writing-mode:vertical-rl;text-align:center;font:900 12px "Noto Serif TC";letter-spacing:.45em;color:var(--red);opacity:.75}
+    .talisman:before{left:7px}.talisman:after{right:7px;content:"百邪退散金鑰護身"}
+    .inner{padding:28px clamp(28px,5vw,62px) 34px}
+    .hero{text-align:center;border-bottom:2px dashed #8b261f66;padding-bottom:20px;margin-bottom:20px}
+    .eyebrow{font-size:11px;font-weight:900;letter-spacing:.26em;color:var(--red)}
+    .hero h2{margin:6px 0 4px;font:900 clamp(30px,6vw,52px) "Noto Serif TC";letter-spacing:.12em;color:var(--red2)}
+    .hero p{margin:0;font-size:13px;font-weight:700}
+    .section-title{display:flex;align-items:center;gap:9px;margin:20px 0 12px;font-weight:900}
+    .step{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--red);color:var(--paper);font-size:12px}
+    .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+    .mode{min-height:86px;padding:12px 8px;border:2px solid #7e281f66;background:#fff4c84d;color:var(--ink);font-weight:900;border-radius:4px;transition:.18s}
+    .mode span{display:block;font-size:21px;margin-bottom:4px}.mode small{display:block;font-weight:600;font-size:11px;opacity:.72}
+    .mode:hover{transform:translateY(-2px);border-color:var(--red)}
+    .mode.active{color:#fff1b8;background:var(--red2);border-color:#2b0707;box-shadow:inset 0 0 0 2px #d95a37}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .control{padding:14px;border:1px solid #79221f55;background:#fff8d94d;border-radius:4px}
+    .control label.head{display:flex;justify-content:space-between;font-weight:900;font-size:13px;margin-bottom:11px}
+    .length-value{color:var(--red);font-size:18px}
+    input[type=range]{width:100%;accent-color:var(--red)}
+    .checks{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;font-weight:700}
+    .checks label{display:flex;align-items:center;gap:7px}.checks input{accent-color:var(--red);width:17px;height:17px}
+    .forge{width:100%;margin-top:18px;padding:15px;border:2px solid #1f0505;border-radius:4px;color:#fff1b8;background:linear-gradient(#b5261d,#720d0d);box-shadow:0 5px 0 #350707;font-weight:900;letter-spacing:.12em;transition:.12s}
+    .forge:hover{filter:brightness(1.13)}.forge:active{transform:translateY(4px);box-shadow:0 1px 0 #350707}
+    .result{margin-top:22px;padding:17px;background:#1d0908;color:#fff4ce;border:4px double var(--red);box-shadow:inset 0 0 25px #000}
+    .result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:#dfa59b;letter-spacing:.1em}
+    .password-row{display:flex;gap:8px}
+    #password{width:100%;min-width:0;border:1px solid #f5c84b66;border-radius:3px;padding:13px;color:#fff;background:#060303;font:700 clamp(15px,3vw,20px) ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em}
+    .icon-btn{flex:0 0 48px;border:1px solid #f2c85b88;background:#32100d;color:var(--paper);border-radius:3px;font-size:18px}
+    .meter{height:7px;margin-top:12px;background:#050202;border-radius:10px;overflow:hidden}.meter span{display:block;height:100%;width:0;background:var(--red);transition:.35s}
+    .result-meta{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:11px;color:#d9b2a8}
+    .meaning{display:none;margin-top:10px;padding:9px 11px;border-left:3px solid var(--paper);background:#4a1711;font-size:12px;line-height:1.6}
+    .seal-btn{width:100%;margin-top:10px;padding:11px;border:1px solid #f2c85b99;border-radius:3px;background:#3c1611;color:var(--paper);font-weight:900;letter-spacing:.08em}.seal-btn:hover{background:#5b1c15}
+    .side{display:grid;gap:16px}
+    .panel{padding:20px;border:1px solid #a9803c88;background:#150a08d9;box-shadow:0 16px 42px #0007}
+    .panel h3{margin:0 0 13px;color:var(--paper);font:900 18px "Noto Serif TC";letter-spacing:.08em}
+    .panel p,.panel li{font-size:13px;line-height:1.7;color:#d8bbb0}.panel ul{margin:0;padding-left:20px}.panel li+li{margin-top:7px}
+    .status{display:flex;gap:10px;align-items:flex-start;padding:11px;border-left:3px solid var(--cyan);background:#08303188;color:#b8fff7;font-size:12px;line-height:1.6}
+    .status b{display:block;color:#fff}
+    .stamp{display:grid;place-items:center;min-height:155px;border:2px dashed #9e2f25;color:#d84836;font:900 27px "Noto Serif TC";letter-spacing:.15em;text-align:center;transform:rotate(-1deg);background:radial-gradient(circle,#5a171244,transparent 68%)}
+    .stamp small{display:block;font:700 10px "Noto Sans TC";letter-spacing:.18em;color:#b0877e;margin-top:7px}
+    .toast{position:fixed;left:50%;bottom:24px;z-index:10;transform:translate(-50%,22px);opacity:0;pointer-events:none;padding:11px 17px;border:1px solid var(--paper);background:#210b09;color:var(--paper);font-weight:700;font-size:13px;transition:.22s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .vault-modal{position:fixed;inset:0;z-index:20;display:none;place-items:center;padding:18px;background:#050202e8;backdrop-filter:blur(8px)}.vault-modal.show{display:grid}.vault-card{width:min(760px,100%);max-height:min(840px,92dvh);overflow:auto;padding:24px;color:var(--cream);background:#190907;border:5px double var(--paper);box-shadow:0 28px 90px #000}.vault-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;border-bottom:1px solid #f2c85b44;padding-bottom:13px;margin-bottom:17px}.vault-head h3{margin:0;color:var(--paper);font:900 24px "Noto Serif TC"}.vault-head p{margin:4px 0 0;color:#c9a79d;font-size:11px}.close{border:1px solid #f2c85b77;background:#32100d;color:var(--paper);width:38px;height:38px;border-radius:50%}.vault-view{display:none}.vault-view.active{display:block}.vault-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.vault-field{display:grid;gap:5px;margin-bottom:12px}.vault-field.full{grid-column:1/-1}.vault-field label{font-size:11px;font-weight:800;color:#e3bba9}.vault-field input,.vault-field select,.vault-field textarea,.vault-search input,.vault-search select{width:100%;border:1px solid #f2c85b66;border-radius:3px;padding:10px;background:#070303;color:#fff;font:inherit}.vault-field textarea{min-height:64px;resize:vertical}.vault-primary{width:100%;padding:12px;border:0;border-radius:3px;background:var(--paper);color:var(--red2);font-weight:900}.vault-note{padding:10px;border-left:3px solid var(--cyan);background:#082b2b88;color:#b8fff7;font-size:11px;line-height:1.6;margin-bottom:15px}.vault-list{display:grid;gap:9px;margin-top:12px}.vault-item{padding:13px;border:1px solid #f2c85b44;background:#0a0403}.vault-item-top{display:flex;justify-content:space-between;gap:10px}.vault-item b{color:var(--paper)}.vault-item small{display:block;color:#c9a79d;margin-top:3px}.vault-secret{margin-top:9px;padding:8px;background:#020101;color:#9ff8ec;font:700 12px ui-monospace,monospace;word-break:break-all}.vault-item-note{margin-top:7px;color:#b99387;font-size:11px}.vault-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.vault-actions button{border:1px solid #f2c85b55;background:#35100d;color:#f7d979;padding:6px 9px;border-radius:3px;font-size:11px}.vault-empty{text-align:center;padding:22px;color:#b99387;font-size:12px}.vault-lock{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;font-size:11px;color:#b99387}.vault-lock button{border:0;background:transparent;color:#e9b44e;text-decoration:underline}.vault-search{display:grid;grid-template-columns:1fr 180px;gap:8px;margin-top:15px}.edit-state{display:none;margin-bottom:12px;padding:10px;border:1px dashed var(--cyan);color:#b8fff7;background:#082b2b88;font-size:12px}.edit-state.show{display:flex;justify-content:space-between;align-items:center;gap:10px}.edit-state button{border:0;background:transparent;color:var(--paper);text-decoration:underline}
+    .guide-steps{display:grid;gap:10px;counter-reset:guide}.guide-step{position:relative;padding:13px 13px 13px 48px;border:1px solid #f2c85b3d;background:#0c0403;color:#d8bbb0;font-size:13px;line-height:1.65}.guide-step:before{counter-increment:guide;content:counter(guide);position:absolute;left:13px;top:13px;display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--red);color:var(--paper);font-weight:900}.guide-step b{display:block;color:var(--paper)}.guide-warn{margin-top:14px;padding:12px;border:1px solid #d14b3988;background:#3a0b08;color:#ffd0c4;font-size:12px;line-height:1.7}.guide-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.guide-fact{padding:10px;background:#082b2b77;border-left:3px solid var(--cyan);color:#c2fff8;font-size:11px;line-height:1.6}
+    .vault-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:14px;padding-top:14px;border-top:1px dashed #f2c85b55}.vault-tools button{padding:9px 6px;border:1px solid #f2c85b66;background:#31100d;color:var(--paper);border-radius:3px;font-size:11px;font-weight:800}.master-gen{width:100%;margin:-4px 0 12px;padding:9px;border:1px solid #58e5dc77;background:#082b2b;color:#b8fff7;border-radius:3px;font-weight:800;font-size:12px}
+    .password-wrap{position:relative}.password-wrap input{padding-right:45px}.eye-btn{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:37px;height:34px;border:0;background:transparent;color:var(--paper);font-size:17px;border-radius:3px}.eye-btn:hover{background:#f2c85b18}.kit-hint{margin-top:7px;color:#b99387;font-size:10px;line-height:1.5}
+    .ritual{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none;visibility:hidden;opacity:0;background:radial-gradient(circle,#240908c9 0,#050202e8 55%,#020101f2);transition:opacity .14s}.ritual.play{visibility:visible;opacity:1}.ritual-core{position:relative;width:230px;height:230px;display:grid;place-items:center}.ritual-ring{position:absolute;inset:9px;border:1px solid #f2c85b99;border-radius:50%;box-shadow:0 0 25px #e8b74355,inset 0 0 25px #e8b74333;animation:ringIn .68s cubic-bezier(.2,.8,.2,1)}.ritual-ring:before,.ritual-ring:after{content:"乾　坎　艮　震　巽　離　坤　兌";position:absolute;inset:18px;display:grid;place-items:center;border:1px dashed #58e5dc99;border-radius:50%;color:#8ff8ef;font:700 10px "Noto Serif TC";letter-spacing:.4em;animation:spin 6s linear infinite}.ritual-ring:after{inset:51px;content:"";border:2px solid #a71919;border-left-color:transparent;border-right-color:transparent;animation-direction:reverse;animation-duration:3s}.ritual-seal{position:relative;z-index:2;width:88px;height:88px;display:grid;place-items:center;border:7px double var(--red);border-radius:18px;background:var(--paper);color:var(--red2);font:900 47px "Noto Serif TC";box-shadow:0 0 45px #e6b83caa;animation:sealIn .68s cubic-bezier(.16,1,.3,1)}.ritual-label{position:absolute;top:calc(50% + 78px);left:50%;transform:translateX(-50%);width:250px;text-align:center;color:var(--paper);font-size:11px;font-weight:900;letter-spacing:.28em;animation:labelIn .68s ease}.ritual.play:after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 85px 32px #f2c85b66;animation:pulse .68s ease-out}
+    @keyframes ringIn{0%{transform:scale(1.5) rotate(-25deg);opacity:0}55%{opacity:1}100%{transform:scale(1) rotate(0)}}@keyframes sealIn{0%{transform:scale(2.7) rotate(16deg);opacity:0}62%{transform:scale(.86) rotate(-3deg);opacity:1}100%{transform:scale(1) rotate(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes labelIn{0%,35%{opacity:0;transform:translate(-50%,8px)}100%{opacity:1;transform:translate(-50%,0)}}@keyframes pulse{0%{transform:scale(.3);opacity:1}100%{transform:scale(16);opacity:0}}
+    @media(max-width:800px){.layout{grid-template-columns:1fr}.topbar{align-items:flex-start}.privacy{display:none}.side{grid-template-columns:1fr 1fr}.panel:last-child{grid-column:1/-1}}
+    @media(max-width:560px){.shell{width:min(100% - 18px,1180px);padding-top:16px}.topbar{flex-direction:column}.brand p{display:none}.seal{width:46px;height:46px}.top-actions{width:100%;justify-content:center;gap:5px}.manager-btn,.guide-btn,.install{padding:7px 10px}.inner{padding:22px 26px}.modes{grid-template-columns:1fr}.mode{min-height:0;text-align:left;padding:10px 14px}.mode span{display:inline;margin-right:7px}.controls,.vault-grid,.vault-search{grid-template-columns:1fr}.side{grid-template-columns:1fr}.panel:last-child{grid-column:auto}.talisman:before,.talisman:after{display:none}.password-row{flex-wrap:wrap}.icon-btn{height:42px;flex:1}.result-meta{flex-direction:column;gap:3px}.guide-facts{grid-template-columns:1fr}.vault-tools{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.ritual.play{visibility:visible;opacity:1}.ritual-ring{display:none}}
+  </style>
+</head>
+<body>
+  <div class="grid"></div><div class="noise"></div>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="seal" aria-hidden="true">鑰</div><div><h1>金鑰鍊成器 × 賽博符咒</h1><p>CYBER TALISMAN · KEY FORGE</p></div></div>
+      <div class="top-actions"><button class="manager-btn" id="openManager">▣ 密碼庫</button><button class="guide-btn" id="openGuide">？ 使用說明</button><button class="install" id="install">＋ 安裝 App</button><div class="privacy">● 本機鍊成・零資料上傳</div></div>
+    </header>
+    <div class="layout">
+      <section class="talisman" id="talisman" aria-labelledby="main-title">
+        <div class="inner">
+          <div class="hero"><div class="eyebrow">奉 敕 令 · DIGITAL PROTECTION</div><h2 id="main-title">金 鑰 鍊 成</h2><p>玄學負責儀式感，密碼學負責真正的安全。</p></div>
+
+          <div class="section-title"><span class="step">壹</span>選擇鍊成術式</div>
+          <div class="modes" role="radiogroup" aria-label="密碼產生模式">
+            <button class="mode active" data-mode="random" role="radio" aria-checked="true"><span>⚡</span>高強度亂碼<small>適合密碼管理器保存</small></button>
+            <button class="mode" data-mode="readable" role="radio" aria-checked="false"><span>◉</span>易讀金鑰<small>排除 0/O、1/l 等字元</small></button>
+            <button class="mode" data-mode="phrase" role="radio" aria-checked="false"><span>☯</span>記憶通關密語<small>中文意象轉寫組合</small></button>
+          </div>
+
+          <div class="section-title"><span class="step">貳</span>注入法力元素</div>
+          <div class="controls">
+            <div class="control">
+              <label class="head" for="length">金鑰長度 <span><b class="length-value" id="lengthValue">18</b> 碼</span></label>
+              <input id="length" type="range" min="8" max="64" value="18">
+            </div>
+            <div class="control">
+              <div class="head" style="display:flex;justify-content:space-between;font-weight:900;font-size:13px;margin-bottom:11px">字元法陣</div>
+              <div class="checks">
+                <label><input id="lower" type="checkbox" checked> 小寫 a–z</label>
+                <label><input id="upper" type="checkbox" checked> 大寫 A–Z</label>
+                <label><input id="number" type="checkbox" checked> 數字 0–9</label>
+                <label><input id="symbol" type="checkbox" checked> 特殊符號</label>
+              </div>
+            </div>
+          </div>
+          <button class="forge" id="forge">敕令啟動・鍊成防護金鑰</button>
+
+          <div class="result" aria-live="polite">
+            <div class="result-head"><span>鍊 成 結 果</span><span id="modeLabel">高強度亂碼術</span></div>
+            <div class="password-row">
+              <input id="password" type="text" readonly aria-label="產生的密碼">
+              <button class="icon-btn" id="toggle" title="顯示或隱藏密碼" aria-label="顯示或隱藏密碼">◉</button>
+              <button class="icon-btn" id="copy" title="複製密碼" aria-label="複製密碼">⧉</button>
+            </div>
+            <div class="meter" aria-hidden="true"><span id="meterBar"></span></div>
+            <div class="result-meta"><b id="strength">等待鍊成</b><span id="entropy">尚未計算組合強度</span></div>
+            <div class="meaning" id="meaning"></div>
+            <button class="seal-btn" id="sendVault">▣ 封印此金鑰至本機密碼庫</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="panel"><h3>護身守則</h3><ul><li><b>一站一密：</b>不同服務不要重複使用。</li><li><b>長度優先：</b>重要帳號建議至少 16 碼。</li><li><b>雙重結界：</b>搭配 2FA 或 Passkey。</li></ul></section>
+        <section class="panel"><h3>隱私結界</h3><div class="status"><span>✓</span><div><b>密碼只在你的瀏覽器中產生</b>本頁不儲存、不傳送，也不記錄鍊成結果。</div></div></section>
+        <section class="panel"><div class="stamp">駭 客 退 散<br>金 鑰 護 身<small>SECURE RANDOMNESS · LOCAL ONLY</small></div></section>
+      </aside>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="ritual" id="ritual" aria-hidden="true"><div class="ritual-core"><div class="ritual-ring"></div><div class="ritual-seal" id="ritualSeal">鑰</div><div class="ritual-label" id="ritualLabel">金 鑰 鍊 成</div></div></div>
+  <div class="vault-modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <section class="vault-card">
+      <header class="vault-head"><div><h3 id="guideTitle">使用說明・數位護身指南</h3><p>從鍊成金鑰到本機加密封印</p></div><button class="close" id="closeGuide" aria-label="關閉使用說明">×</button></header>
+      <div class="guide-steps">
+        <div class="guide-step"><b>選擇鍊成術式</b>一般帳號使用高強度亂碼；需要手動輸入時選易讀金鑰；想自己記住則使用通關密語。</div>
+        <div class="guide-step"><b>設定長度與元素</b>一般帳號建議至少 16 碼；總管法印建議 20 碼以上，並保留大小寫、數字與符號。</div>
+        <div class="guide-step"><b>鍊成並保存</b>可直接複製到網站，或點「封印此金鑰至本機密碼庫」，不用自己記住亂碼。</div>
+        <div class="guide-step"><b>建立總管法印</b>首次開啟密碼庫需設定至少 16 碼的總管法印。建議由本產生器生成，再存入 Bitwarden、Proton Pass 等成熟密碼管理器。</div>
+        <div class="guide-step"><b>在手機與電腦間搬移</b>先在目前裝置匯出最新版加密 JSON，再到另一台裝置匯入。這是手動搬移，不是即時同步；匯入會覆蓋該裝置原有的密碼庫，操作前請確認備份版本。</div>
+        <div class="guide-step"><b>準備離線備援</b>下載「紙本復原卡」空白範本，列印後手寫總管法印與備份位置，再放進上鎖抽屜或保險箱。它不是密碼庫備份檔。</div>
+      </div>
+      <div class="guide-facts">
+        <div class="guide-fact"><b>資料在哪裡？</b><br>加密後只存在目前瀏覽器／裝置，不上傳至本網站伺服器。</div>
+        <div class="guide-fact"><b>手機電腦會同步嗎？</b><br>不會自動同步。可用加密 JSON 手動匯出／匯入；兩邊修改不會自動合併。</div>
+        <div class="guide-fact"><b>可以用 Email 找回嗎？</b><br>不行。工具不保存總管法印，也無法替你解開資料。</div>
+        <div class="guide-fact"><b>清除瀏覽器會怎樣？</b><br>本機密碼庫可能被刪除。清除前請先「匯出加密備份」，並確認檔案可安全取用。</div>
+      </div>
+      <div class="guide-warn"><b>目前是作品集測試原型：</b>尚未完成獨立資安稽核、加密備份與跨裝置同步。請勿用來保存銀行、主要 Email、公司系統或其他高價值真實帳密。</div>
+    </section>
+  </div>
+  <div class="vault-modal" id="vaultModal" role="dialog" aria-modal="true" aria-labelledby="vaultTitle">
+    <section class="vault-card">
+      <header class="vault-head"><div><h3 id="vaultTitle">本機符咒密碼庫</h3><p>LOCAL ENCRYPTED VAULT · 此裝置限定</p></div><button class="close" id="closeVault" aria-label="關閉">×</button></header>
+      <div class="vault-view" id="vaultSetup">
+        <div class="vault-note">首次啟動請建立總管法印。建議使用上方產生器鍊成 16–20 碼，並另外存入可信任的成熟密碼管理器。法印不會被本工具儲存；遺失後無法解開現有資料。</div>
+        <div class="vault-field"><label for="setupMaster">建立總管法印（至少 16 碼）</label><div class="password-wrap"><input id="setupMaster" type="password" autocomplete="new-password"><button type="button" class="eye-btn" data-toggle-password="setupMaster" aria-label="顯示總管法印">◉</button></div></div>
+        <button class="master-gen" id="generateMaster">⚡ 安全鍊成 24 碼總管法印並複製</button>
+        <div class="vault-field"><label for="setupConfirm">再次確認總管法印</label><div class="password-wrap"><input id="setupConfirm" type="password" autocomplete="new-password"><button type="button" class="eye-btn" data-toggle-password="setupConfirm" aria-label="顯示確認法印">◉</button></div></div>
+        <button class="vault-primary" id="createVault">建立本機加密結界</button>
+        <button class="master-gen" id="importVaultSetup" style="margin-top:10px">已有備份？匯入加密備份</button>
+      </div>
+      <div class="vault-view" id="vaultUnlock">
+        <div class="vault-note">此密碼庫只存在目前裝置。請輸入總管法印，在記憶體中暫時解鎖。</div>
+        <div class="vault-field"><label for="unlockMaster">總管法印</label><div class="password-wrap"><input id="unlockMaster" type="password" autocomplete="current-password"><button type="button" class="eye-btn" data-toggle-password="unlockMaster" aria-label="顯示總管法印">◉</button></div></div>
+        <button class="vault-primary" id="unlockVault">解除結界</button>
+      </div>
+      <div class="vault-view" id="vaultOpen">
+        <div class="edit-state" id="editState"><span>正在重塑既有封印紀錄</span><button id="cancelEdit">取消編輯</button></div>
+        <input type="hidden" id="vaultEditId">
+        <div class="vault-grid">
+          <div class="vault-field"><label for="vaultSite">網站／服務名稱 *</label><input id="vaultSite" autocomplete="off" placeholder="例如：Google"></div>
+          <div class="vault-field"><label for="vaultUser">帳號／Email *</label><input id="vaultUser" autocomplete="off"></div>
+          <div class="vault-field"><label for="vaultPassword">鍊成金鑰 *</label><div class="password-wrap"><input id="vaultPassword" type="password" autocomplete="new-password"><button type="button" class="eye-btn" data-toggle-password="vaultPassword" aria-label="顯示密碼">◉</button></div></div>
+          <div class="vault-field"><label for="vaultCategory">分類</label><select id="vaultCategory"><option>電子郵件／通訊</option><option>社群媒體</option><option>工作／學業</option><option>金融／支付</option><option>購物／電商</option><option>娛樂／遊戲</option><option>居家／網路設備</option><option>其他</option></select></div>
+          <div class="vault-field full"><label for="vaultNote">備註</label><textarea id="vaultNote"></textarea></div>
+        </div>
+        <button class="vault-primary" id="saveVaultItem">封印儲存此筆資料</button>
+        <div class="vault-tools">
+          <button id="exportVault">匯出加密備份</button>
+          <button id="importVault">匯入加密備份</button>
+          <button id="downloadKit">下載紙本復原卡</button>
+          <input type="file" id="importVaultFile" accept="application/json,.json" hidden>
+        </div>
+        <div class="kit-hint">跨裝置請先匯出最新版加密 JSON，再到另一台裝置匯入。匯入會覆蓋該裝置現有密碼庫，不會合併資料。紙本復原卡本身不是備份檔。</div>
+        <div class="vault-search"><input id="vaultSearch" type="search" placeholder="搜尋網站、帳號、分類或備註"><select id="vaultFilter"><option value="">全部分類</option><option>電子郵件／通訊</option><option>社群媒體</option><option>工作／學業</option><option>金融／支付</option><option>購物／電商</option><option>娛樂／遊戲</option><option>居家／網路設備</option><option>其他</option><option>工作學業</option><option>電子郵件</option><option>金融電商</option><option>娛樂遊戲</option></select></div>
+        <div class="vault-list" id="vaultList"></div>
+        <div class="vault-lock"><span id="vaultCount">0 筆封印</span><button id="lockVault">立即鎖定密碼庫</button></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const sets={lower:'abcdefghijklmnopqrstuvwxyz',upper:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',number:'0123456789',symbol:'!@#$%^&*_-+=?'};
+    const readableSets={lower:'abcdefghijkmnpqrstuvwxyz',upper:'ABCDEFGHJKLMNPQRSTUVWXYZ',number:'23456789',symbol:'!@#$%*-+=?'};
+    const phrases=[
+      ['白鶴','BaiHe'],['青松','QingSong'],['月光','YueGuang'],['星河','XingHe'],['玄武','XuanWu'],['朱雀','ZhuQue'],
+      ['雷雨','LeiYu'],['雲海','YunHai'],['靈狐','LingHu'],['金烏','JinWu'],['山嵐','ShanLan'],['夜風','YeFeng'],
+      ['退散','TuiSan'],['護身','HuShen'],['鎮守','ZhenShou'],['結界','JieJie'],['開運','KaiYun'],['天機','TianJi']
+    ];
+    const $=id=>document.getElementById(id);
+    let mode='random',visible=true,toastTimer,vaultKey=null,vaultRecords=[],autoLockTimer=null;
+    const revealedRecords=new Set();
+    const encoder=new TextEncoder(),decoder=new TextDecoder();
+    const b64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes)));
+    const unb64=text=>Uint8Array.from(atob(text),c=>c.charCodeAt(0));
+
+    function secureIndex(max){
+      if(!Number.isSafeInteger(max)||max<1)throw new Error('無效的亂數範圍');
+      const limit=Math.floor(0x100000000/max)*max;
+      const data=new Uint32Array(1);
+      do{crypto.getRandomValues(data)}while(data[0]>=limit);
+      return data[0]%max;
+    }
+    const pick=pool=>pool[secureIndex(pool.length)];
+    function shuffle(chars){
+      for(let i=chars.length-1;i>0;i--){const j=secureIndex(i+1);[chars[i],chars[j]]=[chars[j],chars[i]]}
+      return chars.join('');
+    }
+    function options(){return ['lower','upper','number','symbol'].filter(id=>$(id).checked)}
+    function generateChars(kind){
+      const chosen=options();
+      if(!chosen.length){showToast('至少要選擇一種字元法力');return null}
+      const source=kind==='readable'?readableSets:sets;
+      const length=Number($('length').value);
+      const chars=chosen.map(key=>pick(source[key]));
+      const pool=chosen.map(key=>source[key]).join('');
+      while(chars.length<length)chars.push(pick(pool));
+      return {password:shuffle(chars),poolSize:pool.length,meaning:''};
+    }
+    function generatePhrase(){
+      const count=Math.max(3,Math.min(6,Math.round(Number($('length').value)/6)));
+      const used=new Set(),words=[],mean=[];
+      while(words.length<count){const item=phrases[secureIndex(phrases.length)];if(!used.has(item[0])){used.add(item[0]);mean.push(item[0]);words.push(item[1])}}
+      const number=String(secureIndex(1000)).padStart(3,'0');
+      const symbol=pick(sets.symbol);
+      return {password:words.join('-')+'-'+number+symbol,poolSize:phrases.length,meaning:'意象：'+mean.join('・')+'。詞語由安全亂數重新組合，並非固定範本。'};
+    }
+    function forge(silent=false){
+      let result;
+      try{result=mode==='phrase'?generatePhrase():generateChars(mode)}catch(err){showToast('此瀏覽器不支援安全亂數');return}
+      if(!result)return;
+      $('password').value=result.password;$('password').type=visible?'text':'password';
+      $('meaning').textContent=result.meaning;$('meaning').style.display=result.meaning?'block':'none';
+      assess(result.password,result.poolSize);
+      if(!silent)playRitual('鑰','金 鑰 鍊 成');
+    }
+    function assess(password,poolSize){
+      let bits;
+      if(mode==='phrase'){const words=password.split('-').length-1;bits=words*Math.log2(phrases.length)+Math.log2(1000)+Math.log2(sets.symbol.length)}
+      else bits=password.length*Math.log2(poolSize);
+      const rounded=Math.round(bits);
+      let label,color,width;
+      if(bits<45){label='結界偏弱';color='#e04b36';width=30}
+      else if(bits<70){label='中等防護';color='#e7a72b';width=58}
+      else if(bits<100){label='強力結界';color='#58e5dc';width=82}
+      else{label='高強度結界';color='#6ef2a7';width=100}
+      $('strength').textContent=label;$('strength').style.color=color;$('meterBar').style.cssText=`width:${width}%;background:${color}`;
+      $('entropy').textContent=`估算熵值約 ${rounded} bits・請勿跨站重複使用`;
+    }
+    function showToast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1900)}
+    function playRitual(seal,label){
+      const ritual=$('ritual');$('ritualSeal').textContent=seal;$('ritualLabel').textContent=label;ritual.classList.remove('play');void ritual.offsetWidth;ritual.classList.add('play');return new Promise(resolve=>setTimeout(()=>{ritual.classList.remove('play');resolve()},720))
+    }
+    async function copyPassword(){
+      const value=$('password').value;if(!value){showToast('請先鍊成一組金鑰');return}
+      try{await navigator.clipboard.writeText(value);showToast('金鑰已複製到剪貼簿')}catch{ $('password').select();document.execCommand('copy');showToast('金鑰已複製到剪貼簿')}
+    }
+    function generateMasterPassword(){
+      const source=sets.lower+sets.upper+sets.number+sets.symbol;const chars=[pick(sets.lower),pick(sets.upper),pick(sets.number),pick(sets.symbol)];while(chars.length<24)chars.push(pick(source));const value=shuffle(chars);$('setupMaster').value=value;navigator.clipboard.writeText(value).then(()=>showToast('24 碼總管法印已鍊成並複製')).catch(()=>showToast('總管法印已鍊成，請手動複製'));$('setupMaster').type='text';setTimeout(()=>$('setupMaster').type='password',10000)
+    }
+    async function deriveVaultKey(password,salt){
+      const material=await crypto.subtle.importKey('raw',encoder.encode(password),'PBKDF2',false,['deriveKey']);
+      return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+    }
+    async function encryptVault(data,key){const iv=crypto.getRandomValues(new Uint8Array(12));const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoder.encode(JSON.stringify(data)));return {iv:b64(iv),data:b64(cipher)}}
+    async function decryptVault(payload,key){const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(payload.iv)},key,unb64(payload.data));return JSON.parse(decoder.decode(plain))}
+    function vaultMeta(){try{return JSON.parse(localStorage.getItem('cyber_vault_meta_v1'))}catch{return null}}
+    function setVaultView(id){document.querySelectorAll('.vault-view').forEach(v=>v.classList.toggle('active',v.id===id))}
+    function openVault(withPassword=true){$('vaultModal').classList.add('show');const meta=vaultMeta();if(!meta)setVaultView('vaultSetup');else if(!vaultKey)setVaultView('vaultUnlock');else{setVaultView('vaultOpen');if(withPassword)$('vaultPassword').value=$('password').value;resetAutoLock();renderVault()}}
+    async function createVault(){
+      const pw=$('setupMaster').value,confirm=$('setupConfirm').value;if(pw.length<16){showToast('總管法印至少需要 16 碼');return}if(pw!==confirm){showToast('兩次總管法印不一致');return}
+      const salt=crypto.getRandomValues(new Uint8Array(16));vaultKey=await deriveVaultKey(pw,salt);const verifier=await encryptVault({check:'cyber-talisman-vault'},vaultKey);localStorage.setItem('cyber_vault_meta_v1',JSON.stringify({salt:b64(salt),verifier}));vaultRecords=[];await persistVault();$('setupMaster').value=$('setupConfirm').value='';setVaultView('vaultOpen');$('vaultPassword').value=$('password').value;resetAutoLock();renderVault();showToast('本機加密結界已建立');
+    }
+    async function unlockVault(){
+      const meta=vaultMeta();try{const key=await deriveVaultKey($('unlockMaster').value,unb64(meta.salt));const check=await decryptVault(meta.verifier,key);if(check.check!=='cyber-talisman-vault')throw Error();vaultKey=key;const stored=localStorage.getItem('cyber_vault_data_v1');vaultRecords=stored?await decryptVault(JSON.parse(stored),vaultKey):[];$('unlockMaster').value='';setVaultView('vaultOpen');$('vaultPassword').value=$('password').value;resetAutoLock();renderVault();showToast('密碼庫已解鎖')}catch{showToast('總管法印不正確')}
+    }
+    async function persistVault(){const payload=await encryptVault(vaultRecords,vaultKey);localStorage.setItem('cyber_vault_data_v1',JSON.stringify(payload))}
+    function downloadFile(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    function exportVaultBackup(){
+      const meta=localStorage.getItem('cyber_vault_meta_v1'),data=localStorage.getItem('cyber_vault_data_v1');if(!meta||!data){showToast('目前沒有可備份的密碼庫');return}const backup={format:'cyber-talisman-vault',version:1,createdAt:new Date().toISOString(),meta:JSON.parse(meta),data:JSON.parse(data)};downloadFile(`cyber-talisman-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(backup,null,2),'application/json');showToast('加密備份已下載')
+    }
+    async function importVaultBackup(file){
+      try{const backup=JSON.parse(await file.text());if(backup.format!=='cyber-talisman-vault'||backup.version!==1||!backup.meta?.salt||!backup.meta?.verifier||!backup.data?.iv||!backup.data?.data)throw Error();if(!confirm('匯入將覆蓋此裝置現有密碼庫，確定繼續？'))return;localStorage.setItem('cyber_vault_meta_v1',JSON.stringify(backup.meta));localStorage.setItem('cyber_vault_data_v1',JSON.stringify(backup.data));vaultKey=null;vaultRecords=[];$('vaultModal').classList.remove('show');showToast('加密備份已還原，請用原總管法印解鎖')}catch{showToast('備份檔格式錯誤或已損毀')}
+    }
+    function downloadEmergencyKit(){
+      const text=`金鑰鍊成器 × 賽博符咒
+我的密碼庫復原卡
+
+這張卡可以幫助你在更換手機、電腦，或瀏覽器資料遺失後，重新開啟密碼庫。
+
+要成功恢復密碼庫，必須同時保留兩樣東西：
+1. 加密備份檔：裡面裝著加密後的密碼庫資料。
+2. 總管法印：用來解開備份檔的主要密碼。
+
+少了任何一樣，都無法恢復原本的資料。
+
+建立日期：${new Date().toLocaleDateString('zh-TW')}
+網站：${location.href.split('#')[0].split('?')[0]}
+
+1. 我的總管法印
+請用筆寫下來，不要把填寫完成的復原卡拍照或上傳網路。
+________________________________________________
+
+2. 加密備份檔放在哪裡？
+請記錄你把下載的 .json 備份檔存放在哪裡。
+例如：加密 USB、外接硬碟、家中電腦的備份資料夾。
+________________________________________________
+
+3. 總管法印是否存於其他密碼管理器？
+例如：Bitwarden、Proton Pass、1Password 或 Apple「密碼」。
+
+密碼管理器名稱：
+________________________________________________
+
+使用帳號或 Email：
+________________________________________________
+
+請勿在這裡填寫外部密碼管理器自己的登入密碼。
+
+如何恢復密碼庫？
+1. 開啟金鑰鍊成器。
+2. 進入「本機符咒密碼庫」。
+3. 點選「已有備份？匯入加密備份」。
+4. 選擇先前下載的 .json 加密備份檔。
+5. 輸入本卡第一欄手寫的總管法印。
+6. 解鎖後，確認密碼資料是否完整。
+
+重要提醒
+- 這張紙本復原卡本身不是密碼庫備份。
+- 總管法印不會由網站、Email 或客服代為找回。
+- 遺失總管法印，即使有備份檔也無法解密。
+- 只有總管法印、沒有備份檔，也無法恢復資料。
+- 請將填寫完成的卡片放入上鎖抽屜或保險箱。
+- 不要拍照，也不要透過聊天室、Email 或一般雲端相簿傳送。
+`;downloadFile('賽博符咒-紙本復原卡.txt',text,'text/plain;charset=utf-8');showToast('紙本復原卡已下載，請列印後手寫')
+    }
+    function togglePasswordField(button){const input=$(button.dataset.togglePassword);const showing=input.type==='text';input.type=showing?'password':'text';button.textContent=showing?'◉':'◎';button.setAttribute('aria-label',showing?'顯示密碼':'隱藏密碼')}
+    async function saveVaultItem(){
+      const site=$('vaultSite').value.trim(),user=$('vaultUser').value.trim(),password=$('vaultPassword').value;if(!site||!user||!password){showToast('請填寫網站、帳號與金鑰');return}
+      await playRitual('封','加 密 封 印');const editId=$('vaultEditId').value;const record={id:editId||crypto.randomUUID(),site,user,password,category:$('vaultCategory').value,note:$('vaultNote').value.trim(),createdAt:editId?(vaultRecords.find(r=>r.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),updatedAt:new Date().toISOString()};if(editId){vaultRecords=vaultRecords.map(r=>r.id===editId?record:r)}else vaultRecords.unshift(record);await persistVault();clearVaultForm();renderVault();resetAutoLock();showToast(editId?'封印紀錄已更新':'金鑰已加密封印');
+    }
+    function clearVaultForm(){['vaultSite','vaultUser','vaultPassword','vaultNote','vaultEditId'].forEach(id=>$(id).value='');$('editState').classList.remove('show');$('saveVaultItem').textContent='封印儲存此筆資料'}
+    function editVaultItem(id){const item=vaultRecords.find(r=>r.id===id);if(!item)return;$('vaultSite').value=item.site;$('vaultUser').value=item.user;$('vaultPassword').value=item.password;$('vaultCategory').value=item.category;$('vaultNote').value=item.note||'';$('vaultEditId').value=item.id;$('editState').classList.add('show');$('saveVaultItem').textContent='確認重塑此筆封印';$('vaultSite').focus();resetAutoLock()}
+    function renderVault(){
+      const list=$('vaultList');list.replaceChildren();const query=$('vaultSearch').value.trim().toLowerCase(),category=$('vaultFilter').value;const records=vaultRecords.filter(item=>(!category||item.category===category)&&(!query||[item.site,item.user,item.category,item.note].join(' ').toLowerCase().includes(query)));$('vaultCount').textContent=query||category?`${records.length} / ${vaultRecords.length} 筆封印`:`${vaultRecords.length} 筆封印`;
+      if(!records.length){const empty=document.createElement('div');empty.className='vault-empty';empty.textContent=vaultRecords.length?'遍尋結界，沒有符合的紀錄':'目前結界空無一物';list.append(empty);return}
+      records.forEach(item=>{const card=document.createElement('article');card.className='vault-item';const top=document.createElement('div');top.className='vault-item-top';const info=document.createElement('div');const title=document.createElement('b');title.textContent=item.site;const sub=document.createElement('small');sub.textContent=`${item.user}・${item.category}`;info.append(title,sub);top.append(info);const secret=document.createElement('div');secret.className='vault-secret';secret.textContent=revealedRecords.has(item.id)?item.password:'••••••••••••';card.append(top,secret);if(item.note){const note=document.createElement('div');note.className='vault-item-note';note.textContent=item.note;card.append(note)}const actions=document.createElement('div');actions.className='vault-actions';const reveal=document.createElement('button');reveal.textContent=revealedRecords.has(item.id)?'隱藏':'顯示';reveal.onclick=()=>{revealedRecords.has(item.id)?revealedRecords.delete(item.id):revealedRecords.add(item.id);renderVault();resetAutoLock()};const copy=document.createElement('button');copy.textContent='複製金鑰';copy.onclick=async()=>{await navigator.clipboard.writeText(item.password);showToast('封印金鑰已複製');resetAutoLock()};const edit=document.createElement('button');edit.textContent='編輯';edit.onclick=()=>editVaultItem(item.id);const del=document.createElement('button');del.textContent='刪除';del.onclick=async()=>{if(!confirm(`確定刪除 ${item.site}？`))return;vaultRecords=vaultRecords.filter(r=>r.id!==item.id);revealedRecords.delete(item.id);await persistVault();renderVault();showToast('封印紀錄已刪除')};actions.append(reveal,copy,edit,del);card.append(actions);list.append(card)})
+    }
+    function resetAutoLock(){if(!vaultKey)return;clearTimeout(autoLockTimer);autoLockTimer=setTimeout(()=>lockVault(true),5*60*1000)}
+    function lockVault(automatic=false){clearTimeout(autoLockTimer);vaultKey=null;vaultRecords=[];revealedRecords.clear();clearVaultForm();$('vaultModal').classList.remove('show');showToast(automatic?'閒置 5 分鐘，密碼庫已自動鎖定':'本機密碼庫已鎖定')}
+    document.querySelectorAll('.mode').forEach(button=>button.addEventListener('click',()=>{
+      mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>{const active=b===button;b.classList.toggle('active',active);b.setAttribute('aria-checked',active)});
+      const phrase=mode==='phrase';document.querySelector('.checks').style.opacity=phrase?'.38':'1';document.querySelectorAll('.checks input').forEach(i=>i.disabled=phrase);
+      $('modeLabel').textContent={random:'高強度亂碼術',readable:'易讀金鑰術',phrase:'記憶通關密語術'}[mode];forge();
+    }));
+    $('length').addEventListener('input',()=>{$('lengthValue').textContent=$('length').value});
+    $('forge').addEventListener('click',forge);$('copy').addEventListener('click',copyPassword);
+    $('openGuide').addEventListener('click',()=>$('guideModal').classList.add('show'));$('closeGuide').addEventListener('click',()=>$('guideModal').classList.remove('show'));
+    $('openManager').addEventListener('click',()=>openVault(false));
+    $('sendVault').addEventListener('click',()=>openVault(true));$('closeVault').addEventListener('click',()=>$('vaultModal').classList.remove('show'));
+    $('generateMaster').addEventListener('click',generateMasterPassword);$('exportVault').addEventListener('click',exportVaultBackup);$('importVault').addEventListener('click',()=>$('importVaultFile').click());$('importVaultSetup').addEventListener('click',()=>$('importVaultFile').click());$('importVaultFile').addEventListener('change',event=>{const file=event.target.files[0];if(file)importVaultBackup(file);event.target.value='' });$('downloadKit').addEventListener('click',downloadEmergencyKit);
+    $('createVault').addEventListener('click',createVault);$('unlockVault').addEventListener('click',unlockVault);$('saveVaultItem').addEventListener('click',saveVaultItem);$('lockVault').addEventListener('click',()=>lockVault(false));$('cancelEdit').addEventListener('click',clearVaultForm);$('vaultSearch').addEventListener('input',renderVault);$('vaultFilter').addEventListener('change',renderVault);
+    document.querySelectorAll('[data-toggle-password]').forEach(button=>button.addEventListener('click',()=>togglePasswordField(button)));
+    $('toggle').addEventListener('click',()=>{visible=!visible;$('password').type=visible?'text':'password';$('toggle').textContent=visible?'◉':'◎';showToast(visible?'金鑰已顯形':'金鑰已隱匿')});
+    let installPrompt;
+    window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;$('install').classList.add('show')});
+    $('install').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').classList.remove('show')});
+    window.addEventListener('appinstalled',()=>showToast('金鑰鍊成器已安裝'));
+    if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+    forge(true);
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="在瀏覽器本機產生安全、易讀或好記的密碼，不上傳任何資料。">
+  <meta name="description" content="在瀏覽器本機產生安全、易讀或好記的密碼；密碼與保險庫資料不上傳至網站伺服器。">
   <meta name="theme-color" content="#170706">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,6 +11,17 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>金鑰鍊成器 × 賽博符咒</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-87WES9QGWZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    if (location.hostname === 'merle1022.github.io') {
+      gtag('config', 'G-87WES9QGWZ', {
+        linker: { domains: ['merle188.com', 'ipas-ai-quiz.netlify.app', 'ielts.merle188.com', 'fanfan.merle188.com', 'merle1022.github.io', 'ai-team-quest.merle-lab.workers.dev'] }
+      });
+    }
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&family=Noto+Serif+TC:wght@700;900&display=swap');
     :root{--paper:#f2c85b;--paper2:#d99b2b;--red:#a71919;--red2:#5d0c0c;--ink:#28110d;--cream:#fff1b8;--cyan:#58e5dc;--shadow:#080303;--ok:#117b5a;--warn:#9a5b00}
@@ -88,7 +99,7 @@
   <main class="shell">
     <header class="topbar">
       <div class="brand"><div class="seal" aria-hidden="true">鑰</div><div><h1>金鑰鍊成器 × 賽博符咒</h1><p>CYBER TALISMAN · KEY FORGE</p></div></div>
-      <div class="top-actions"><button class="manager-btn" id="openManager">▣ 密碼庫</button><button class="guide-btn" id="openGuide">？ 使用說明</button><button class="install" id="install">＋ 安裝 App</button><div class="privacy">● 本機鍊成・零資料上傳</div></div>
+      <div class="top-actions"><button class="manager-btn" id="openManager">▣ 密碼庫</button><button class="guide-btn" id="openGuide">？ 使用說明</button><button class="install" id="install">＋ 安裝 App</button><div class="privacy">● 密碼留在本機・本站使用 GA4 分析</div></div>
     </header>
     <div class="layout">
       <section class="talisman" id="talisman" aria-labelledby="main-title">
@@ -142,6 +153,10 @@
       </aside>
     </div>
   </main>
+  <footer style="width:min(1180px,calc(100% - 32px));margin:0 auto 24px;color:#d8bbb0;font-size:12px;line-height:1.7">
+    <p>由 <a href="https://merle188.com/about/" rel="author" style="color:#9ff8ec">梅爾</a> 製作・<a href="https://merle188.com/works/" style="color:#9ff8ec">查看作品集</a></p>
+    <p>Google Analytics 4 僅記錄頁面瀏覽與不含密碼或保險庫內容的元件互動；密碼和保險庫資料仍只在目前瀏覽器處理。詳見 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color:#9ff8ec">Google 隱私權政策</a>。</p>
+  </footer>
   <div class="toast" id="toast" role="status"></div>
   <div class="ritual" id="ritual" aria-hidden="true"><div class="ritual-core"><div class="ritual-ring"></div><div class="ritual-seal" id="ritualSeal">鑰</div><div class="ritual-label" id="ritualLabel">金 鑰 鍊 成</div></div></div>
   <div class="vault-modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
@@ -393,6 +408,15 @@ ________________________________________________
     $('install').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').classList.remove('show')});
     window.addEventListener('appinstalled',()=>showToast('金鑰鍊成器已安裝'));
     if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+    document.addEventListener('click',event=>{
+      const element=event.target.closest('button,a,[role="button"]');
+      if(!element||typeof gtag!=='function'||location.hostname!=='merle1022.github.io')return;
+      gtag('event','ui_interaction',{
+        element_type:element.tagName.toLowerCase(),
+        element_id:element.id||'no_id',
+        element_class:typeof element.className==='string'?element.className.trim().replace(/\s+/g,'_'):'no_class'
+      });
+    });
     forge(true);
   </script>
 </body>
